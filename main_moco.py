@@ -302,7 +302,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         if args.gpu is not None:
             images[0] = images[0].cuda(args.gpu, non_blocking=True)
             images[1] = images[1].cuda(args.gpu, non_blocking=True)
-
+        images[0].cuda(non_blocking=True)
+        images[1].cuda(non_blocking=True)
         # compute output
         output, target = model(im_q=images[0].unsqueeze(0), im_k=images[1].unsqueeze(0))
         loss = criterion(output, target)
