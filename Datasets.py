@@ -85,6 +85,6 @@ class Rolling_Window_Year_Dataset(Dataset):
 
 
         if (self.transform):
-            image = self.transform(image)
+            image = self.transform(np.array(image))
 
         return (image, label)
