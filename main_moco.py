@@ -33,7 +33,7 @@ model_names = sorted(name for name in models.__dict__
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('--train-data', default='elevation_train.csv', type=str, help='training data path (default: elevation_train.csv)')
 parser.add_argument('--val-data', default='elevation_val.csv', type=str, help='validation data path (default: elevation_val.csv)')
-parser.add_argument('data', metavar='DIR',
+parser.add_argument('-data', default='5001', type=str,
                     help='path to dataset')
 parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet50',
                     choices=model_names,
