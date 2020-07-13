@@ -252,7 +252,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # train_dataset = datasets.ImageFolder(
     #     traindir,
     #     moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
-    train_dataset = Rolling_Window_Year_Dataset('year_built', args.train_data, args.data, transform=moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+    train_dataset = Rolling_Window_Year_Dataset('year_built', args.train_data, args.data, transform=moco.loader.TwoCropsTransform(augmentation))
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:
