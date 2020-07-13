@@ -191,7 +191,7 @@ def main_worker(gpu, ngpus_per_node, args):
         # AllGather implementation (batch shuffle, queue update, etc.) in
         # this code only supports DistributedDataParallel.
         model.cuda()
-        model = torch.nn.parallel.DistributedDataParallel(model)
+        # model = torch.nn.parallel.DistributedDataParallel(model)
         # raise NotImplementedError("Only DistributedDataParallel is supported.")
 
     # define loss function (criterion) and optimizer
