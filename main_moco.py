@@ -252,7 +252,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # train_dataset = datasets.ImageFolder(
     #     traindir,
     #     moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
-    train_dataset = Rolling_Window_Year_Dataset('year_built', args.train_data, args.data, transform=augmentation)
+    train_dataset = Rolling_Window_Year_Dataset('year_built', args.train_data, args.data, transform=moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:
@@ -305,7 +305,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         images[0] = images[0].cuda(non_blocking=True)
         images[1] = images[1].cuda(non_blocking=True)
         # compute output
-        output, target = model(im_q=images[0].unsqueeze(0), im_k=images[1].unsqueeze(0))
+        output, target = model(im_q=images[0], im_k=images[1])
         loss = criterion(output, target)
 
         # acc1/acc5 are (K+1)-way contrast classifier accuracy
