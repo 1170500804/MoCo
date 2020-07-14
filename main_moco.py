@@ -31,7 +31,7 @@ from Datasets import Rolling_Window_Year_Dataset
 #
 #     # initialize the process group
 #     dist.init_process_group("gloo", rank=rank, world_size=world_size)
-# 
+#
 #
 # def cleanup():
 #     dist.destroy_process_group()
@@ -196,7 +196,7 @@ def main_worker(gpu, ngpus_per_node, args):
     elif args.gpu is not None:
         torch.cuda.set_device(args.gpu)
         model = model.cuda(args.gpu)
-        setup(args.rank, args.world_size)
+        # setup(args.rank, args.world_size)
         # comment out the following line for debugging
         # raise NotImplementedError("Only DistributedDataParallel is supported.")
     else:
@@ -269,7 +269,7 @@ def main_worker(gpu, ngpus_per_node, args):
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:
         train_sampler = None
-
+    print(args.batch_size)
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler, drop_last=True)
