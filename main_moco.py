@@ -264,16 +264,18 @@ def main_worker(gpu, ngpus_per_node, args):
     # train_dataset = datasets.ImageFolder(
     #     traindir,
     #     moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+
     train_dataset = Rolling_Window_Year_Dataset('year_built', args.train_data, args.data, transform=moco.loader.TwoCropsTransform(augmentation))
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:
         train_sampler = None
-    print(args.batch_size)
+    # print(args.batch_size)
+    print("loading dataset")
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler, drop_last=True)
-
+    print('training')
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
@@ -284,13 +286,14 @@ def main_worker(gpu, ngpus_per_node, args):
 
         if not args.multiprocessing_distributed or (args.multiprocessing_distributed
                 and args.rank % ngpus_per_node == 0):
+            print('saving checkpoint')
             save_checkpoint({
                 'epoch': epoch + 1,
                 'arch': args.arch,
                 'state_dict': model.state_dict(),
                 'optimizer' : optimizer.state_dict(),
             }, is_best=False, filename='checkpoint_{:04d}.pth.tar'.format(epoch))
-
+        print('finished training epoch: '+str(epoch))
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
     batch_time = AverageMeter('Time', ':6.3f')
@@ -314,8 +317,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         if args.gpu is not None:
             images[0] = images[0].cuda(args.gpu, non_blocking=True)
             images[1] = images[1].cuda(args.gpu, non_blocking=True)
-        images[0] = images[0].cuda(non_blocking=True)
-        images[1] = images[1].cuda(non_blocking=True)
+        # images[0] = images[0].cuda(non_blocking=True)
+        # images[1] = images[1].cuda(non_blocking=True)
         # compute output
         output, target = model(im_q=images[0], im_k=images[1])
         loss = criterion(output, target)
