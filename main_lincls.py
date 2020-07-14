@@ -361,7 +361,7 @@ def main_worker(gpu, ngpus_per_node, args):
         # model.load_state_dict((torch.load(args.checkpoint)))
 
 
-        val_cm, val_cm_fig = construct_confusion_matrix_image(val_dataset.classes, cm_val)
+        val_cm, val_cm_fig = construct_confusion_matrix_image(range(12), cm_val)
         plt.tight_layout()
         val_cm_fig.savefig(os.path.join(log_dir, 'val_cm.png'), dpi=200)
         summary_writer.add_image('Val/confusion_matrix',
@@ -395,14 +395,14 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     for i, (images, target) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
-        print(target.tolist())
+        # print(target.tolist())
         if args.gpu is not None:
             images = images.cuda(args.gpu, non_blocking=True)
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
         output = model(images)
-        print(output.tolist())
+        # print(output.tolist())
         loss = criterion(output, target)
 
         # measure accuracy and record loss
