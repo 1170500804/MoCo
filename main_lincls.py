@@ -457,7 +457,7 @@ def validate(val_loader, model, criterion, args):
 
             # print(output.tolist())
             print(len(output[0].tolist()))
-            outputs.extend(output.tolist())
+            outputs.extend(torch.argmax(output,1).tolist())
             loss = criterion(output, target)
 
             # measure accuracy and record loss
