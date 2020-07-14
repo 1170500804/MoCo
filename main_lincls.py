@@ -188,7 +188,7 @@ def main_worker(gpu, ngpus_per_node, args):
     model = models.__dict__[args.arch]()
 
     # freeze all layers but the last fc
-    model.fc = nn.Linear(512, 12)
+    model.fc = nn.Linear(2048, 12)
     for name, param in model.named_parameters():
         if name not in ['fc.weight', 'fc.bias']:
             param.requires_grad = False
