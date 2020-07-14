@@ -452,8 +452,9 @@ def validate(val_loader, model, criterion, args):
             # compute output
             output = model(images)
             print('=-===')
-            print(len(output))
+
             print(output.tolist())
+            print(len(output.tolist[0]))
             outputs.extend(output.tolist())
             loss = criterion(output, target)
 
