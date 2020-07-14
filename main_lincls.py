@@ -481,6 +481,7 @@ def validate(val_loader, model, criterion, args):
     # print(outputs)
     report_items = precision_recall_fscore_support(ground_truths, outputs, average='macro')
     confusion_matrix = sklearn.metrics.confusion_matrix(np.array(ground_truths), np.array(outputs))
+    print(confusion_matrix)
     return top1.avg, report_items[2], report_items[0], report_items[1], confusion_matrix
 
 
