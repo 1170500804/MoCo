@@ -21,13 +21,15 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 from Datasets import Rolling_Window_Year_Dataset
+from torch.utils.tensorboard import SummaryWriter
+from sklearn.metrics import classification_report, precision_recall_fscore_support
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
-parser.add_argument('data', metavar='DIR',
+parser.add_argument('-data', default='5001', type=str,
                     help='path to dataset')
 parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet50',
                     choices=model_names,
@@ -84,6 +86,90 @@ parser.add_argument('--pretrained', default='', type=str,
 best_acc1 = 0
 
 
+import argparse
+import datetime
+import os
+import time
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import sklearn.metrics
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from sklearn.metrics import classification_report, precision_recall_fscore_support
+from torch.autograd import Variable
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import transforms
+
+from preprocessing import Coarse_Grained_Dataset, Fine_Grained_Dataset
+from residual_attention_network import ResidualAttentionModel_92
+
+parser = argparse.ArgumentParser(description='Train Residual Attention')
+parser.add_argument('--train-data', default='/home/liushuai/small_examples/images/train', type=str,
+                    help='Folder containing train data')
+parser.add_argument('--val-data', default='/home/liushuai/small_examples/images/validate', type=str,
+                    help='Folder containing validation data')
+parser.add_argument('--test-data', default='/home/liushuai/small_examples/images/test', type=str,
+                    help='Folder containing validation data')
+parser.add_argument('--fine', action='store_true',
+                    help='Do all class classification instead of combining')
+parser.add_argument('--eval', action='store_true',
+                    help='Only do evaluation')
+parser.add_argument('--exp-name', type=str, help='Name of this experiment to add to path name of log')
+parser.add_argument('--checkpoint', type=str,
+                    help='Path to checkpoint for evaluation')
+args = parser.parse_args()
+
+coarse_experiment = not args.fine
+
+if not args.eval and args.checkpoint is not None:
+    print ("This checkpoint argument is only to provide a checkpoint for evaluation but the eval flag is not set.")
+    exit(1)
+elif args.eval and args.checkpoint is None:
+    print ("No checkpoint for evaluation chosen.")
+    exit(1)
+train_dir = args.train_data
+val_dir = args.val_data
+if args.eval:
+    test_dir = args.test_data
+
+
+
+log_dir = os.path.join('runs', 'run_{}'.format(args.exp_name) + currentTime)
+summary_writer = SummaryWriter(log_dir)
+
+best_model_path = os.path.join(log_dir, 'best_accuracy.pkl')
+latest_model_path = os.path.join(log_dir, 'checkpoint.pkl')
+
+
+def construct_confusion_matrix_image(classes, con_mat):
+    con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
+
+    con_mat_df = pd.DataFrame(con_mat_norm,
+                              index=classes,
+                              columns=classes)
+
+    figure = plt.figure(figsize=(8, 8))
+    sns.heatmap(con_mat_df, annot=True, cmap=plt.cm.Blues)
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
+    figure.canvas.draw()
+
+
+
+    # Now we can save it to a numpy array.
+    data_confusion_matrix = np.fromstring(figure.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+    data_confusion_matrix = data_confusion_matrix.reshape(figure.canvas.get_width_height()[::-1] + (3,))
+    data_confusion_matrix = torch.from_numpy(np.transpose(data_confusion_matrix, (2, 0, 1)))
+
+    return data_confusion_matrix, figure
 def main():
     args = parser.parse_args()
 
@@ -285,17 +371,19 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.evaluate:
         validate(val_loader, model, criterion, args)
         return
-
+    print('start training')
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
         adjust_learning_rate(optimizer, epoch, args)
 
         # train for one epoch
+        print('epoch_{}'.format(epoch))
         train(train_loader, model, criterion, optimizer, epoch, args)
 
         # evaluate on validation set
-        acc1 = validate(val_loader, model, criterion, args)
+        print('validating')
+        acc1, f1_val, prec_val, recall_val, cm_val = validate(val_loader, model, criterion, args)
 
         # remember best acc@1 and save checkpoint
         is_best = acc1 > best_acc1
@@ -312,6 +400,19 @@ def main_worker(gpu, ngpus_per_node, args):
             }, is_best)
             if epoch == args.start_epoch:
                 sanity_check(model.state_dict(), args.pretrained)
+
+        # epoch = 0
+        # model.load_state_dict((torch.load(args.checkpoint)))
+
+
+        val_cm, val_cm_fig = construct_confusion_matrix_image(val_dataset.classes, cm_val)
+        plt.tight_layout()
+        val_cm_fig.savefig(os.path.join(log_dir, 'val_cm.png'), dpi=200)
+        summary_writer.add_image('Val/confusion_matrix',
+                                 val_cm, epoch)
+        summary_writer.add_scalar('Val/F1', f1_val, epoch)
+        summary_writer.add_scalar('Val/Precision', prec_val, epoch)
+        summary_writer.add_scalar('Val/Recall', recall_val, epoch)
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
@@ -364,6 +465,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         if i % args.print_freq == 0:
             progress.display(i)
+    return acc1, acc5
 
 
 def validate(val_loader, model, criterion, args):
@@ -381,13 +483,17 @@ def validate(val_loader, model, criterion, args):
 
     with torch.no_grad():
         end = time.time()
+        outputs = []
+        ground_truths = []
         for i, (images, target) in enumerate(val_loader):
             if args.gpu is not None:
                 images = images.cuda(args.gpu, non_blocking=True)
+            ground_truths.extend(target.tolist())
             target = target.cuda(args.gpu, non_blocking=True)
 
             # compute output
             output = model(images)
+            outputs.extend(output.tolist())
             loss = criterion(output, target)
 
             # measure accuracy and record loss
@@ -406,8 +512,9 @@ def validate(val_loader, model, criterion, args):
         # TODO: this should also be done with the ProgressMeter
         print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
               .format(top1=top1, top5=top5))
-
-    return top1.avg
+    report_items = precision_recall_fscore_support(ground_truths, outputs, average='macro')
+    confusion_matrix = sklearn.metrics.confusion_matrix(np.array(ground_truths), np.array(outputs))
+    return top1.avg, report_items[2], report_items[0], report_items[1], confusion_matrix
 
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
