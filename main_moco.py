@@ -35,6 +35,9 @@ from Datasets import Rolling_Window_Year_Dataset
 #
 # def cleanup():
 #     dist.destroy_process_group()
+save_pretrain_dir = os.path.join(os.getcwd(), 'unsupervised_pretrained')
+if not os.path.exists(save_pretrain_dir):
+    os.mkdir(save_pretrain_dir)
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -292,7 +295,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 'arch': args.arch,
                 'state_dict': model.state_dict(),
                 'optimizer' : optimizer.state_dict(),
-            }, is_best=False, filename='checkpoint_{:04d}.pth.tar'.format(epoch))
+            }, is_best=False, filename=os.path.join(save_pretrain_dir, 'checkpoint_{:04d}.pth.tar'.format(epoch)))
         print('finished training epoch: '+str(epoch))
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
