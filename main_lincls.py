@@ -52,7 +52,7 @@ parser.add_argument('--epochs', default=100, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--batch-size', default=32, type=int,
                     metavar='N',
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
@@ -189,7 +189,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # freeze all layers but the last fc
     model.fc = nn.Linear(2048, 12)
-    print(model)
+    # print(model)
     for name, param in model.named_parameters():
         if name not in ['fc.weight', 'fc.bias']:
             param.requires_grad = False
@@ -477,8 +477,8 @@ def validate(val_loader, model, criterion, args):
         # TODO: this should also be done with the ProgressMeter
         print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
               .format(top1=top1, top5=top5))
-    print(ground_truths)
-    print(outputs)
+    # print(ground_truths)
+    # print(outputs)
     report_items = precision_recall_fscore_support(ground_truths, outputs, average='macro')
     confusion_matrix = sklearn.metrics.confusion_matrix(np.array(ground_truths), np.array(outputs),labels=np.array(range(12)))
     print(confusion_matrix)

@@ -94,6 +94,8 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'N processes per node, which has N GPUs. This is the '
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
+parser.add_argument('--save-last', action='store_true',
+                    help='whether to only save the last model')
 
 # moco specific configs:
 parser.add_argument('--moco-dim', default=128, type=int,
@@ -287,15 +289,24 @@ def main_worker(gpu, ngpus_per_node, args):
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
 
-        if not args.multiprocessing_distributed or (args.multiprocessing_distributed
-                and args.rank % ngpus_per_node == 0):
-            print('saving checkpoint')
-            save_checkpoint({
-                'epoch': epoch + 1,
-                'arch': args.arch,
-                'state_dict': model.state_dict(),
-                'optimizer' : optimizer.state_dict(),
-            }, is_best=False, filename=os.path.join(save_pretrain_dir, 'checkpoint_{:04d}.pth.tar'.format(epoch)))
+        if(args.save_last):
+            if(epoch == args.epochs-1):
+                save_checkpoint({
+                    'epoch': epoch + 1,
+                    'arch': args.arch,
+                    'state_dict': model.state_dict(),
+                    'optimizer': optimizer.state_dict(),
+                }, is_best=False, filename=os.path.join(save_pretrain_dir, 'checkpoint_{:04d}.pth.tar'.format(epoch)))
+        else:
+            if not args.multiprocessing_distributed or (args.multiprocessing_distributed
+                    and args.rank % ngpus_per_node == 0):
+                print('saving checkpoint')
+                save_checkpoint({
+                    'epoch': epoch + 1,
+                    'arch': args.arch,
+                    'state_dict': model.state_dict(),
+                    'optimizer' : optimizer.state_dict(),
+                }, is_best=False, filename=os.path.join(save_pretrain_dir, 'checkpoint_{:04d}.pth.tar'.format(epoch)))
         print('finished training epoch: '+str(epoch))
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
