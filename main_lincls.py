@@ -2,14 +2,10 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import argparse
 import builtins
-import os
 import random
 import shutil
-import time
 import warnings
 
-import torch
-import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
@@ -17,12 +13,24 @@ import torch.optim
 import torch.multiprocessing as mp
 import torch.utils.data
 import torch.utils.data.distributed
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
+
 import torchvision.models as models
 from Datasets import Rolling_Window_Year_Dataset
-from torch.utils.tensorboard import SummaryWriter
+import datetime
+import os
+import time
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import sklearn.metrics
+import torch
+import torch.nn as nn
 from sklearn.metrics import classification_report, precision_recall_fscore_support
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import transforms
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -86,66 +94,12 @@ parser.add_argument('--pretrained', default='', type=str,
 best_acc1 = 0
 
 
-import argparse
-import datetime
-import os
-import time
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import sklearn.metrics
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from sklearn.metrics import classification_report, precision_recall_fscore_support
-from torch.autograd import Variable
-from torch.utils.data import DataLoader
-from torch.utils.tensorboard import SummaryWriter
-from torchvision import transforms
-
-from preprocessing import Coarse_Grained_Dataset, Fine_Grained_Dataset
-from residual_attention_network import ResidualAttentionModel_92
-
-parser = argparse.ArgumentParser(description='Train Residual Attention')
-parser.add_argument('--train-data', default='/home/liushuai/small_examples/images/train', type=str,
-                    help='Folder containing train data')
-parser.add_argument('--val-data', default='/home/liushuai/small_examples/images/validate', type=str,
-                    help='Folder containing validation data')
-parser.add_argument('--test-data', default='/home/liushuai/small_examples/images/test', type=str,
-                    help='Folder containing validation data')
-parser.add_argument('--fine', action='store_true',
-                    help='Do all class classification instead of combining')
-parser.add_argument('--eval', action='store_true',
-                    help='Only do evaluation')
-parser.add_argument('--exp-name', type=str, help='Name of this experiment to add to path name of log')
-parser.add_argument('--checkpoint', type=str,
-                    help='Path to checkpoint for evaluation')
-args = parser.parse_args()
-
-coarse_experiment = not args.fine
-
-if not args.eval and args.checkpoint is not None:
-    print ("This checkpoint argument is only to provide a checkpoint for evaluation but the eval flag is not set.")
-    exit(1)
-elif args.eval and args.checkpoint is None:
-    print ("No checkpoint for evaluation chosen.")
-    exit(1)
-train_dir = args.train_data
-val_dir = args.val_data
-if args.eval:
-    test_dir = args.test_data
 
 
-
-log_dir = os.path.join('runs', 'run_{}'.format(args.exp_name) + currentTime)
+currentTime = datetime.now()
+currentTime = currentTime.strftime("%m%d%Y")
+log_dir = os.path.join('runs', 'run_{}' + currentTime)
 summary_writer = SummaryWriter(log_dir)
-
-best_model_path = os.path.join(log_dir, 'best_accuracy.pkl')
-latest_model_path = os.path.join(log_dir, 'checkpoint.pkl')
-
 
 def construct_confusion_matrix_image(classes, con_mat):
     con_mat_norm = np.around(con_mat.astype('float') / con_mat.sum(axis=1)[:, np.newaxis], decimals=2)
@@ -449,7 +403,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         loss = criterion(output, target)
 
         # measure accuracy and record loss
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        acc1, acc5 = accuracy(output, target, topk=(1, 2))
         losses.update(loss.item(), images.size(0))
         top1.update(acc1[0], images.size(0))
         top5.update(acc5[0], images.size(0))
