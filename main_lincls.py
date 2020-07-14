@@ -454,7 +454,7 @@ def validate(val_loader, model, criterion, args):
             print('=-===')
 
             print(output.tolist())
-            print(len(output.tolist[0]))
+            print(len(output[0].tolist()))
             outputs.extend(output.tolist())
             loss = criterion(output, target)
 
