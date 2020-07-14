@@ -96,7 +96,7 @@ best_acc1 = 0
 
 
 
-currentTime = datetime.now()
+currentTime = datetime.datetime.now()
 currentTime = currentTime.strftime("%m%d%Y")
 log_dir = os.path.join('runs', 'run_{}' + currentTime)
 summary_writer = SummaryWriter(log_dir)
