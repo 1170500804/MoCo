@@ -395,13 +395,14 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     for i, (images, target) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
-
+        print(target.tolist)
         if args.gpu is not None:
             images = images.cuda(args.gpu, non_blocking=True)
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
         output = model(images)
+        print(output.tolist)
         loss = criterion(output, target)
 
         # measure accuracy and record loss
