@@ -189,6 +189,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # freeze all layers but the last fc
     model.fc = nn.Linear(2048, 12)
+    print(model)
     for name, param in model.named_parameters():
         if name not in ['fc.weight', 'fc.bias']:
             param.requires_grad = False
@@ -452,9 +453,9 @@ def validate(val_loader, model, criterion, args):
 
             # compute output
             output = model(images)
-            print('=-===')
+            print('=-print===')
 
-            print(output.tolist())
+            # print(output.tolist())
             print(len(output[0].tolist()))
             outputs.extend(output.tolist())
             loss = criterion(output, target)
