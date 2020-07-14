@@ -402,6 +402,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         # compute output
         output = model(images)
+        print(len(output))
         # print(output.tolist())
         loss = criterion(output, target)
 
@@ -450,6 +451,8 @@ def validate(val_loader, model, criterion, args):
 
             # compute output
             output = model(images)
+            print('=-===')
+            print(len(output))
             outputs.extend(output.tolist())
             loss = criterion(output, target)
 
