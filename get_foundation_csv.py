@@ -13,4 +13,4 @@ for type_ in os.listdir(image_folder):
             dataset['filename'].append(os.path.join(type_,img))
             dataset['year_built'].append(random.randint(1913, 2013))
 dataset_df = pd.DataFrame(dataset)
-dataset_df.to_csv('foundation_type')
+dataset_df.to_csv('foundation_type.csv')
