@@ -28,7 +28,7 @@ import datetime
 
 import moco.loader
 import moco.builder
-from Datasets import Rolling_Window_Year_Dataset
+from Datasets import cluster_year_built_dataset
 # def setup(rank, world_size):
 #     os.environ['MASTER_ADDR'] = 'localhost'
 #     os.environ['MASTER_PORT'] = '12355'
@@ -39,6 +39,7 @@ from Datasets import Rolling_Window_Year_Dataset
 #
 # def cleanup():
 #     dist.destroy_process_group()
+# python3.6 main_moco.py --lr 0.03 --epochs 200 --batch-size 256 --dist-url 'tcp://localhost:10001' --multiprocessing-distributed --world-size 6 --train-data all_data.csv --mlp --cos --aug-plus
 currentTime = datetime.datetime.now()
 currentTime = currentTime.strftime("%m%d%Y")
 log_dir = os.path.join('runs', 'run_{}' + currentTime)
@@ -279,7 +280,7 @@ def main_worker(gpu, ngpus_per_node, args):
     #     traindir,
     #     moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
 
-    train_dataset = Rolling_Window_Year_Dataset('year_built', args.train_data, args.data, transform=moco.loader.TwoCropsTransform(augmentation))
+    train_dataset = cluster_year_built_dataset('year_built', args.train_data, args.data, transform=moco.loader.TwoCropsTransform(augmentation), )
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:
@@ -367,7 +368,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     avg_loss = np.mean(np.array(loss_for_this_epoch))
     summary_writer.add_scalar('avg_loss_epoch', avg_loss, epoch+1)
     summary_writer.add_scalar('avg_top1_acc', top1.avg, epoch+1)
-    summary_writer.add_scalar(('avg_top5', top5.avg, epoch+1))
+    summary_writer.add_scalar(('avg_top5_acc', top5.avg, epoch+1))
 
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
