@@ -9,6 +9,8 @@ import shutil
 import time
 import warnings
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -21,6 +23,8 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 # import torchvision.datasets as datasets
 import torchvision.models as models
+from torch.utils.tensorboard import SummaryWriter
+import datetime
 
 import moco.loader
 import moco.builder
@@ -35,9 +39,14 @@ from Datasets import Rolling_Window_Year_Dataset
 #
 # def cleanup():
 #     dist.destroy_process_group()
-save_pretrain_dir = os.path.join(os.getcwd(), 'unsupervised_pretrained')
+currentTime = datetime.datetime.now()
+currentTime = currentTime.strftime("%m%d%Y")
+log_dir = os.path.join('runs', 'run_{}' + currentTime)
+summary_writer = SummaryWriter(log_dir)
+save_pretrain_dir = os.path.join('~/MoCo_stats', 'unsupervised_pretrained')
 if not os.path.exists(save_pretrain_dir):
     os.mkdir(save_pretrain_dir)
+log_dir = os.path.join(save_pretrain_dir, log_dir)
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -322,7 +331,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
     # switch to train mode
     model.train()
-
+    loss_for_this_epoch = []
     end = time.time()
     for i, (images, _) in enumerate(train_loader):
         # measure data loading time
@@ -336,7 +345,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         # compute output
         output, target = model(im_q=images[0], im_k=images[1])
         loss = criterion(output, target)
-
+        loss_for_this_epoch.append(loss.item().detach().cpu())
         # acc1/acc5 are (K+1)-way contrast classifier accuracy
         # measure accuracy and record loss
         acc1, acc5 = accuracy(output, target, topk=(1, 5))
@@ -355,6 +364,10 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         if i % args.print_freq == 0:
             progress.display(i)
+    avg_loss = np.mean(np.array(loss_for_this_epoch))
+    summary_writer.add_scalar('avg_loss_epoch', avg_loss, epoch+1)
+    summary_writer.add_scalar('avg_top1_acc', top1.avg, epoch+1)
+    summary_writer.add_scalar(('avg_top5', top5.avg, epoch+1))
 
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
