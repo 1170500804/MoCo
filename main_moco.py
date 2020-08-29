@@ -44,7 +44,10 @@ currentTime = datetime.datetime.now()
 currentTime = currentTime.strftime("%m%d%Y")
 log_dir = os.path.join('runs', 'run_{}' + currentTime)
 summary_writer = SummaryWriter(log_dir)
-save_pretrain_dir = os.path.join('/home/shuai/MoCo_stats', 'unsupervised_pretrained')
+save_base_dir = '/home/shuai/MoCo_stats'
+if not os.path.exists(save_base_dir):
+    os.mkdir(save_base_dir)
+save_pretrain_dir = os.path.join(save_base_dir, 'unsupervised_pretrained')
 if not os.path.exists(save_pretrain_dir):
     os.mkdir(save_pretrain_dir)
 log_dir = os.path.join(save_pretrain_dir, log_dir)
