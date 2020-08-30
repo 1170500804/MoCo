@@ -55,7 +55,7 @@ class MoCo(nn.Module):
         keys = concat_all_gather(keys)
 
         batch_size = keys.shape[0]
-
+        print('batchsize: '+str(batch_size))
         ptr = int(self.queue_ptr)
         assert self.K % batch_size == 0  # for simplicity
 
