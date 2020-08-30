@@ -369,8 +369,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         if i % args.print_freq == 0:
             progress.display(i)
     avg_loss = np.mean(np.array(loss_for_this_epoch))
-    summary_writer.add_scalar('avg_loss_epoch', avg_loss.cpu().item(), epoch+1)
-    summary_writer.add_scalar('avg_top1_acc', top1.avg.cpu().item(), epoch+1)
+    summary_writer.add_scalar('avg_loss_epoch', avg_loss, epoch+1)
+    summary_writer.add_scalar('avg_top1_acc', top1.avg, epoch+1)
     # print(top5.avg)
     summary_writer.add_scalar(('avg_top5_acc', top5.avg.cpu().item(), epoch+1))
 
