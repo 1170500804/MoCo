@@ -337,7 +337,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     model.train()
     loss_for_this_epoch = []
     end = time.time()
-    for i, (images, _) in enumerate(train_loader):
+    for i, (images, _, _) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
 
