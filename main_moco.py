@@ -42,15 +42,16 @@ from Datasets import cluster_year_built_dataset
 # python3.6 main_moco.py --lr 0.03 --epochs 200 --batch-size 256 --dist-url 'tcp://localhost:10001' --multiprocessing-distributed --world-size 6 --train-data all_data.csv --mlp --cos --aug-plus
 currentTime = datetime.datetime.now()
 currentTime = currentTime.strftime("%m%d%Y")
-log_dir = os.path.join('runs', 'run_{}' + currentTime)
-summary_writer = SummaryWriter(log_dir)
 save_base_dir = '/home/shuai/MoCo_stats'
+log_dir = os.path.join('runs', 'run_{}'.format(currentTime))
 if not os.path.exists(save_base_dir):
     os.mkdir(save_base_dir)
-save_pretrain_dir = os.path.join(save_base_dir, 'unsupervised_pretrained')
+save_pretrain_dir = os.path.join(save_base_dir, 'unsupervised_pretrained_{}'.format(currentTime)) #'/home/shuai/MoCo_stats/unsupervised_pretrained'
 if not os.path.exists(save_pretrain_dir):
     os.mkdir(save_pretrain_dir)
-log_dir = os.path.join(save_pretrain_dir, log_dir)
+log_dir = os.path.join(save_base_dir, log_dir)
+summary_writer = SummaryWriter(log_dir)
+
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
