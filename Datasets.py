@@ -16,9 +16,7 @@ class cluster_year_built_dataset(Dataset):
         self.df = pd.read_csv(csv_path)
         length = len(self.df)
         length = int(length/batchsize) * batchsize
-        self.df = self.df.sample(length)
-        self.df = self.df.sort_index()
-        self.df.index = range(length)
+        self.df = self.df.iloc[:length,:]
         self.transform = transform
         self.regression = regression
         self.attribute_name = attribute_name
