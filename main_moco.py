@@ -135,7 +135,7 @@ def main():
     args.batch_size = int(args.batch_size/args.n) * args.n
     args.moco_k = int(65536/args.batch_size) * args.batch_size
     print('batch size: {}'.format(args.batch_size))
-    print('queue length: {}'/format(args.moco_k))
+    print('queue length: {}'.format(args.moco_k))
     if args.seed is not None:
         random.seed(args.seed)
         torch.manual_seed(args.seed)
