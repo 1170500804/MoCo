@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import random
-image_folder = '/home/saschaho/Simcenter/Foundation_Images_Orig'
+image_folder = '/home/shuai/YearBuiltData'
 dataset = {}
 dataset['filename'] =  []
 dataset['year_built'] = []
