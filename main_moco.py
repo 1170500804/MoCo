@@ -457,6 +457,7 @@ if __name__ == '__main__':
                 save_pretrain_dir = args.resume_save_path
                 log_dir = args.resume_save_path.split('/')[-1]
                 log_dir = log_dir.split('_')[-1]
+                print(log_dir)
                 log_dir = os.path.join(save_base_dir, 'runs/run_' + log_dir)
                 print('save model at: ' + args.resume_save_path)
                 print('log at: ' + log_dir)
