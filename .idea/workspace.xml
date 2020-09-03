@@ -2,10 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="89652f59-98e6-4bd9-9513-746dd2a0dbc2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/moco-master.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/moco-master.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Untitled.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Untitled.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/get_foundation_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/get_foundation_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/all_data.csv" beforeDir="false" afterPath="$PROJECT_DIR$/all_data.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_moco.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_moco.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +83,7 @@
       <option name="presentableId" value="Default" />
       <updated>1594552433656</updated>
       <workItem from="1599030984250" duration="904000" />
-      <workItem from="1599113020758" duration="729000" />
+      <workItem from="1599113020758" duration="1687000" />
     </task>
     <servers />
   </component>

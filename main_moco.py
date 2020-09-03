@@ -109,6 +109,7 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'multi node data parallel training')
 parser.add_argument('--save-last', action='store_true',
                     help='whether to only save the last model')
+parser.add_argument('--n', type=int, required=True, help='the number of gpus')
 
 # moco specific configs:
 parser.add_argument('--moco-dim', default=128, type=int,
@@ -131,7 +132,10 @@ parser.add_argument('--cos', action='store_true',
 
 def main():
     args = parser.parse_args()
-
+    args.batch_size = int(args.batch_size/args.n) * args.n
+    args.moco_k = int(65536/args.batch_size) * args.batch_size
+    print('batch size: {}'.format(args.batch_size))
+    print('queue length: {}'/format(args.moco_k))
     if args.seed is not None:
         random.seed(args.seed)
         torch.manual_seed(args.seed)
@@ -283,7 +287,7 @@ def main_worker(gpu, ngpus_per_node, args):
     #     traindir,
     #     moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
 
-    train_dataset = cluster_year_built_dataset('year_built', args.train_data, args.data, transform=moco.loader.TwoCropsTransform(augmentation), )
+    train_dataset = cluster_year_built_dataset('year_built',args.batch_size, args.train_data, args.data, transform=moco.loader.TwoCropsTransform(augmentation), )
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:

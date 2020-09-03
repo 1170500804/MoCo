@@ -9,11 +9,16 @@ from PIL import Image
 from torch.utils.data import Dataset
 import skimage
 class cluster_year_built_dataset(Dataset):
-    def __init__(self, attribute_name, csv_path, img_path, transform=None, regression=False, mask_buildings=False, softmask=False,steps=10):
+    def __init__(self, batchsize, attribute_name, csv_path, img_path, transform=None, regression=False, mask_buildings=False, softmask=False,steps=10):
         if (attribute_name != 'year_built' and attribute_name != 'effective_year_built:') or regression:
             raise ValueError('Wrong attribute or training type for this dataset: {}'.format(attribute_name))
 
         self.df = pd.read_csv(csv_path)
+        length = len(self.df)
+        length = int(length/batchsize) * batchsize
+        self.df = self.df.sample(length)
+        self.df = self.df.sort_index()
+        self.df.index = range(length)
         self.transform = transform
         self.regression = regression
         self.attribute_name = attribute_name
