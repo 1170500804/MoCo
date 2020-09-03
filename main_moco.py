@@ -39,18 +39,7 @@ from Datasets import cluster_year_built_dataset
 #
 # def cleanup():
 #     dist.destroy_process_group()
-# python3.6 main_moco.py --lr 0.03 --epochs 200 --batch-size 256 --dist-url 'tcp://localhost:10001' --multiprocessing-distributed --world-size 6 --train-data all_data.csv --mlp --cos --aug-plus
-currentTime = datetime.datetime.now()
-currentTime = currentTime.strftime("%m%d%Y")
-save_base_dir = '/home/shuai/MoCo_stats'
-log_dir = os.path.join('runs', 'run_{}'.format(currentTime))
-if not os.path.exists(save_base_dir):
-    os.mkdir(save_base_dir)
-save_pretrain_dir = os.path.join(save_base_dir, 'unsupervised_pretrained_{}'.format(currentTime)) #'/home/shuai/MoCo_stats/unsupervised_pretrained'
-if not os.path.exists(save_pretrain_dir):
-    os.mkdir(save_pretrain_dir)
-log_dir = os.path.join(save_base_dir, log_dir)
-summary_writer = SummaryWriter(log_dir)
+
 
 
 model_names = sorted(name for name in models.__dict__
@@ -111,6 +100,7 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
 parser.add_argument('--save-last', action='store_true',
                     help='whether to only save the last model')
 parser.add_argument('--n', type=int, required=True, help='the number of gpus')
+parser.add_argument('--resume-save-path', type=str, default=None, help='the path of saving model parameters when resuming')
 
 # moco specific configs:
 parser.add_argument('--moco-dim', default=128, type=int,
@@ -132,7 +122,7 @@ parser.add_argument('--cos', action='store_true',
 
 
 def main():
-    args = parser.parse_args()
+
     args.batch_size = int(args.batch_size/args.n) * args.n
     args.moco_k = int(65536/args.batch_size) * args.batch_size
     print('batch size: {}'.format(args.batch_size))
@@ -253,6 +243,7 @@ def main_worker(gpu, ngpus_per_node, args):
                   .format(args.resume, checkpoint['epoch']))
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
+            exit()
 
     cudnn.benchmark = True
 
@@ -457,4 +448,34 @@ def accuracy(output, target, topk=(1,)):
 
 
 if __name__ == '__main__':
+    args = parser.parse_args()
+    # python3.6 main_moco.py --lr 0.03 --epochs 200 --batch-size 256 --dist-url 'tcp://localhost:10001' --multiprocessing-distributed --world-size 6 --train-data all_data.csv --mlp --cos --aug-plus
+    save_base_dir = '/home/shuai/MoCo_stats'
+    if args.resume:
+        if args.resume_save_path:
+            if os.path.exists(args.resume_save_path):
+                save_pretrain_dir = args.resume_save_path
+                log_dir = args.resume_save_path.split('/')[-1]
+                log_dir = log_dir.split('_')[-1]
+                log_dir = os.path.join(save_base_dir, 'runs/run_' + log_dir)
+                print('save model at: ' + args.resume_save_path)
+                print('log at: ' + log_dir)
+            else:
+                print('There does not exists path:{}'.format(args.resume_save_path))
+        else:
+            print('please specify a parameter save path!')
+    else:
+        currentTime = datetime.datetime.now()
+        currentTime = currentTime.strftime("%Y%m%d%H%M%S")
+        log_dir = os.path.join('runs', 'run_{}'.format(currentTime))
+        if not os.path.exists(save_base_dir):
+            os.mkdir(save_base_dir)
+        save_pretrain_dir = os.path.join(save_base_dir, 'unsupervised_pretrained_{}'.format(
+            currentTime))  # '/home/shuai/MoCo_stats/unsupervised_pretrained'
+        if not os.path.exists(save_pretrain_dir):
+            os.mkdir(save_pretrain_dir)
+        log_dir = os.path.join(save_base_dir, log_dir)
+
+    summary_writer = SummaryWriter(log_dir)
+
     main()
