@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+# python main_moco.py --lr 0.03 --epochs 200 --batch-size 256 --dist-url 'tcp://localhost:10001'
+# --multiprocessing-distributed --world-size 1 --train-data all_data.csv --mlp
+# --moco-t 0.2 --aug-plus --cos --rank 0 --n 5
 import argparse
 import builtins
 import math

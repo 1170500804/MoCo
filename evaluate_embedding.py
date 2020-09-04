@@ -6,6 +6,7 @@ import os
 import torch
 from torchvision import transforms
 from torch.utils.data import DataLoader
+import torch.distributed as dist
 
 from Datasets import cluster_year_built_dataset
 import moco.loader
@@ -31,6 +32,14 @@ def main():
                         help='model architecture: ' +
                              ' | '.join(model_names) +
                              ' (default: resnet50)')
+    parser.add_argument('--world-size', default=-1, type=int,
+                        help='number of nodes for distributed training')
+    parser.add_argument('--rank', default=-1, type=int,
+                        help='node rank for distributed training')
+    parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
+                        help='url used to set up distributed training')
+    parser.add_argument('--dist-backend', default='nccl', type=str,
+                        help='distributed backend')
 
     args = parser.parse_args()
     # prepare dataset
@@ -46,6 +55,10 @@ def main():
     dataloader = DataLoader(val_dataset,shuffle=False,
             num_workers=args.workers, pin_memory=True)
     embeddings = {'embedding':[], 'year_built':[]}
+
+    # parallel training
+    dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
+                            world_size=args.world_size, rank=args.rank)
     # load model
     model = models.__dict__[args.arch]()
     model.cuda()
