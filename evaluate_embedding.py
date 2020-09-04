@@ -91,4 +91,6 @@ def main():
         if (args.to_csv):
             df.to_csv('/home/shuai/MoCo_stats/embedding/embeddings_'+args.resume+'.csv')
 if __name__ == '__main__':
+    if not os.path.exists('/home/shuai/MoCo_stats/embedding'):
+        os.mkdir('/home/shuai/MoCo_stats/embedding')
     main()
