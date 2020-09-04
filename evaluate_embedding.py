@@ -22,6 +22,7 @@ def main():
                         help='path to dataset')
     parser.add_argument('--to-csv', action='store_true', help='save the embeddin as file in /home/shuai/MoCo_stats/embedding')
     parser.add_argument('--embedding-file', type=str, help='if provide the embedding file')
+    parser.add_argument('--batch-size', type=int, default=32)
 
 
     args = parser.parse_args()
