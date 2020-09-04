@@ -122,34 +122,7 @@ parser.add_argument('--cos', action='store_true',
 
 args = parser.parse_args()
 # python3.6 main_moco.py --lr 0.03 --epochs 200 --batch-size 256 --dist-url 'tcp://localhost:10001' --multiprocessing-distributed --world-size 6 --train-data all_data.csv --mlp --cos --aug-plus
-save_base_dir = '/home/shuai/MoCo_stats'
-if args.resume:
-    if args.resume_save_path:
-        if os.path.exists(args.resume_save_path):
-            save_pretrain_dir = args.resume_save_path
-            log_dir = args.resume_save_path.split('/')[-2]
-            log_dir = log_dir.split('_')[-1]
-            print(log_dir)
-            log_dir = os.path.join(save_base_dir, 'runs/run_' + log_dir)
-            print('save model at: ' + args.resume_save_path)
-            print('log at: ' + log_dir)
-        else:
-            print('There does not exists path:{}'.format(args.resume_save_path))
-    else:
-        print('please specify a parameter save path!')
-else:
-    currentTime = datetime.datetime.now()
-    currentTime = currentTime.strftime("%Y%m%d%H%M%S")
-    log_dir = os.path.join('runs', 'run_{}'.format(currentTime))
-    if not os.path.exists(save_base_dir):
-        os.mkdir(save_base_dir)
-    save_pretrain_dir = os.path.join(save_base_dir, 'unsupervised_pretrained_{}'.format(
-        currentTime))  # '/home/shuai/MoCo_stats/unsupervised_pretrained'
-    if not os.path.exists(save_pretrain_dir):
-        os.mkdir(save_pretrain_dir)
-    log_dir = os.path.join(save_base_dir, log_dir)
 
-summary_writer = SummaryWriter(log_dir)
 def main():
 
     args.batch_size = int(args.batch_size/args.n) * args.n
@@ -334,7 +307,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     'arch': args.arch,
                     'state_dict': model.state_dict(),
                     'optimizer': optimizer.state_dict(),
-                }, is_best=False, filename=os.path.join(save_pretrain_dir, 'checkpoint_{:04d}.pth.tar'.format(epoch)))
+                }, is_best=False, filename=os.path.join(args.save_pretrain_dir, 'checkpoint_{:04d}.pth.tar'.format(epoch)))
         else:
             if not args.multiprocessing_distributed or (args.multiprocessing_distributed
                     and args.rank % ngpus_per_node == 0):
@@ -344,7 +317,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     'arch': args.arch,
                     'state_dict': model.state_dict(),
                     'optimizer' : optimizer.state_dict(),
-                }, is_best=False, filename=os.path.join(save_pretrain_dir, 'checkpoint_{:04d}.pth.tar'.format(epoch)))
+                }, is_best=False, filename=os.path.join(args.save_pretrain_dir, 'checkpoint_{:04d}.pth.tar'.format(epoch)))
         print('finished training epoch: '+str(epoch))
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
@@ -394,6 +367,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         if i % args.print_freq == 0:
             progress.display(i)
     avg_loss = np.mean(np.array(loss_for_this_epoch))
+    summary_writer = SummaryWriter(args.log_dir)
     summary_writer.add_scalar('avg_loss_epoch', avg_loss, epoch+1)
     summary_writer.add_scalar('avg_top1_acc', top1.avg.cpu().item(), epoch+1)
     # print(top5.avg)
@@ -478,5 +452,36 @@ def accuracy(output, target, topk=(1,)):
 
 if __name__ == '__main__':
 
+    save_base_dir = '/home/shuai/MoCo_stats'
+    if args.resume:
+        if args.resume_save_path:
+            if os.path.exists(args.resume_save_path):
+                save_pretrain_dir = args.resume_save_path
+                log_dir = args.resume_save_path.split('/')[-2]
+                log_dir = log_dir.split('_')[-1]
+                print(log_dir)
+                log_dir = os.path.join(save_base_dir, 'runs/run_' + log_dir)
+                print('save model at: ' + args.resume_save_path)
+                print('log at: ' + log_dir)
+            else:
+                print('There does not exists path:{}'.format(args.resume_save_path))
+        else:
+            print('please specify a parameter save path!')
+    else:
+        currentTime = datetime.datetime.now()
+        currentTime = currentTime.strftime("%Y%m%d%H%M%S")
+        log_dir = os.path.join('runs', 'run_{}'.format(currentTime))
+        if not os.path.exists(save_base_dir):
+            os.mkdir(save_base_dir)
+            print('making direction: ' + save_base_dir)
+        save_pretrain_dir = os.path.join(save_base_dir, 'unsupervised_pretrained_{}'.format(
+            currentTime))  # '/home/shuai/MoCo_stats/unsupervised_pretrained'
+        if not os.path.exists(save_pretrain_dir):
+            os.mkdir(save_pretrain_dir)
+            print('making direction: '+save_pretrain_dir)
+        log_dir = os.path.join(save_base_dir, log_dir)
+
+    args.log_dir = log_dir
+    args.save_pretrain_dir = save_pretrain_dir
 
     main()
