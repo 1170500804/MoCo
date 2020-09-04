@@ -11,6 +11,9 @@ from Datasets import cluster_year_built_dataset
 import moco.loader
 import moco.builder
 from torchvision import models
+model_names = sorted(name for name in models.__dict__
+    if name.islower() and not name.startswith("__")
+    and callable(models.__dict__[name]))
 def main():
     parser = argparse.ArgumentParser(description='PyTorch year_built Training Validation')
     parser.add_argument('--validate-data', type=str, help='the data to be visualized', required=True)
@@ -23,7 +26,11 @@ def main():
     parser.add_argument('--to-csv', action='store_true', help='save the embeddin as file in /home/shuai/MoCo_stats/embedding')
     parser.add_argument('--embedding-file', type=str, help='if provide the embedding file')
     parser.add_argument('--batch-size', type=int, default=32)
-
+    parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet50',
+                        choices=model_names,
+                        help='model architecture: ' +
+                             ' | '.join(model_names) +
+                             ' (default: resnet50)')
 
     args = parser.parse_args()
     # prepare dataset
@@ -35,7 +42,7 @@ def main():
                 transforms.ToTensor(),
                 normalize,
             ])
-    val_dataset = cluster_year_built_dataset(args.batch_size,'year_built', args.train_data, args.data, transform=augmentation_val, )
+    val_dataset = cluster_year_built_dataset(args.batch_size,'year_built', args.validate_data, args.data, transform=augmentation_val, )
     dataloader = DataLoader(val_dataset,shuffle=False,
             num_workers=args.workers, pin_memory=True)
     embeddings = {'embedding':[], 'year_built':[]}
@@ -44,8 +51,8 @@ def main():
     model.cuda()
     model = torch.nn.parallel.DistributedDataParallel(model)
     if os.path.isfile(args.resume):
-        print("=> loading checkpoint '{}'".format(args.pretrained))
-        checkpoint = torch.load(args.pretrained, map_location="cpu")
+        print("=> loading checkpoint '{}'".format(args.resume))
+        checkpoint = torch.load(args.resume, map_location="cpu")
 
         # rename moco pre-trained keys
         state_dict = checkpoint['state_dict']
@@ -59,9 +66,9 @@ def main():
 
 
 
-        print("=> loaded pre-trained model '{}'".format(args.pretrained))
+        print("=> loaded pre-trained model '{}'".format(args.resume))
     else:
-        print("=> no checkpoint found at '{}'".format(args.pretrained))
+        print("=> no checkpoint found at '{}'".format(args.resume))
     if args.embedding_file:
         pass
     else:
