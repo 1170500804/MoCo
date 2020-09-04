@@ -46,7 +46,7 @@ model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
 
-parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
+parser = argparse.ArgumentParser(description='PyTorch year_built Training')
 parser.add_argument('--train-data', default='elevation_train.csv', type=str, help='training data path (default: elevation_train.csv)')
 parser.add_argument('--val-data', default='elevation_val.csv', type=str, help='validation data path (default: elevation_val.csv)')
 parser.add_argument('-data', default='', type=str,
