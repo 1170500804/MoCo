@@ -90,10 +90,11 @@ def main():
         model.eval()
         labels = None
         embd = None
+        print('Dataset length: {}'.format(val_dataset.__len__()))
         iter = val_dataset.__len__()/args.batch_size
         for i, (images, targets, _) in enumerate(dataloader):
             if(i%1000 == 0):
-                print('{}/{}'.format(i,int(iter/1000)))
+                print('{}/{}'.format(int(i/1000),int(iter/1000)))
             images = images.cuda()
             targets = targets.cuda()
             # print('dim_{}'.format(model.size(1)))
@@ -120,6 +121,13 @@ def main():
 
         df = pd.DataFrame(embeddings)
         if (args.to_csv):
+            name = args.resume.split('/')
+            if(args.resume.endswith('/')):
+                name = name[-3].split('_')[-1] + name[-2].split['.'][0]
+                print(name)
+            else:
+                name = name[-2].split('_')[-1] + name[-1].split['.'][0]
+            print(name)
             df.to_csv('/home/shuai/MoCo_stats/embedding/embeddings_'+args.resume+'.csv')
 if __name__ == '__main__':
     if not os.path.exists('/home/shuai/MoCo_stats/embedding'):
