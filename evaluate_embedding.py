@@ -101,7 +101,7 @@ def main():
             else:
                 labels = torch.cat([labels, targets], dim=0)
                 embd = torch.cat([embd, output], dim=0)
-            print('dim_{}'.format(model.size(1)))
+            print('dim_{}'.format(output.size(1)))
             assert(model.size(1) == 128)
         labels = labels.cpu().tolist()
         embd = embd.cpu().tolist()
