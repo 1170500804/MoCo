@@ -148,10 +148,10 @@ def main():
             t = targets.cpu()
             o = output.cpu()
             if i == 0:
-                print(o.size())
-                print(t.size())
-            labels.extend(t.tolist())# torch.cat([labels, targets], dim=0)
-            embd.extend(o.tolist()) #= torch.cat([embd, output], dim=0)
+                print(o.numpy().shape)
+                print(t.numpy().shape)
+            labels.extend(t.numpy())# torch.cat([labels, targets], dim=0)
+            embd.extend(o.numpy()) #= torch.cat([embd, output], dim=0)
         # embeddings['embedding'] = embd
         # embeddings['year_built'] = labels
         # df = pd.DataFrame(embeddings)
