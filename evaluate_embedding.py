@@ -22,21 +22,19 @@ model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
 # /home/shuai/MoCo_stats/unsupervised_pretrained_20200904035252/checkpoint_0199.pth.tar
-def plot_t_sne(data_subset, filename):
+def plot_t_sne(data_subset_embd, data_subset_label, filename):
     time_start = time.time()
     tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
-    tsne_results = tsne.fit_transform(data_subset.loc[:,['embedding']])
+    tsne_results = tsne.fit_transform(data_subset_embd)
     print('t-SNE done! Time elapsed: {} seconds'.format(time.time() - time_start))
-    data_subset['tsne-2d-one'] = tsne_results[:, 0]
-    data_subset['tsne-2d-two'] = tsne_results[:, 1]
     plt.figure(figsize=(32, 32))
     # sns.set()
 
     sns_plot = sns.scatterplot(
-        x="tsne-2d-one", y="tsne-2d-two",
+        x=tsne_results[:, 0], y=tsne_results[:, 1],
         hue="year_built",
         palette=sns.color_palette("hls", 10),
-        data=data_subset,
+        data=data_subset_label,
         legend="full",
         alpha=0.3
     )
@@ -150,8 +148,8 @@ def main():
             if i == 0:
                 print(o.numpy().shape)
                 print(t.numpy().shape)
-            labels.extend(t.numpy())# torch.cat([labels, targets], dim=0)
-            embd.extend(o.numpy()) #= torch.cat([embd, output], dim=0)
+            labels.extend(np.array(t))# torch.cat([labels, targets], dim=0)
+            embd.extend(np.array(t)) #= torch.cat([embd, output], dim=0)
         # embeddings['embedding'] = embd
         # embeddings['year_built'] = labels
         # df = pd.DataFrame(embeddings)
