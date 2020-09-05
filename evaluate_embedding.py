@@ -89,7 +89,7 @@ def main():
         model.eval()
         labels = None
         embd = None
-        for i, (images, targets) in enumerate(dataloader):
+        for i, (images, targets, _) in enumerate(dataloader):
             images = images.cuda()
             targets = targets.cuda()
             print('dim_{}'.format(model.size(1)))
