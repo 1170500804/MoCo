@@ -146,8 +146,8 @@ def main():
             t = targets.cpu().detach()
             o = output.cpu().detach()
             if i == 0:
-                print(o.numpy().shape)
-                print(t.numpy().shape)
+                print(np.array(t).shape)
+                print(np.array(o).shape)
             labels.extend(np.array(t))# torch.cat([labels, targets], dim=0)
             embd.extend(np.array(t)) #= torch.cat([embd, output], dim=0)
         # embeddings['embedding'] = embd
@@ -155,9 +155,11 @@ def main():
         # df = pd.DataFrame(embeddings)
         embd = np.array(embd)
         labels = np.array(labels)
+        print(embd.shape)
+        print(labels.shape)
         if (args.to_csv):
-            np.save(name+'_embd.npy', embd)
-            np.save(name + '_label.npy', labels)
+            np.savetxt(embd, '/home/shuai/MoCo_stats/embedding/'+name+'_embd.npy')
+            np.savetxt(labels, '/home/shuai/MoCo_stats/embedding/'+name+'_label.npy')
 if __name__ == '__main__':
     if not os.path.exists('/home/shuai/MoCo_stats/embedding'):
         os.mkdir('/home/shuai/MoCo_stats/embedding')
