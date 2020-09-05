@@ -24,7 +24,7 @@ model_names = sorted(name for name in models.__dict__
 def plot_t_sne(data_subset, filename):
     time_start = time.time()
     tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
-    tsne_results = tsne.fit_transform(data_subset)
+    tsne_results = tsne.fit_transform(data_subset.loc[:,['embedding']])
     print('t-SNE done! Time elapsed: {} seconds'.format(time.time() - time_start))
     data_subset['tsne-2d-one'] = tsne_results[:, 0]
     data_subset['tsne-2d-two'] = tsne_results[:, 1]
