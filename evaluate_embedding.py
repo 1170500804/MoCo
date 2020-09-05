@@ -132,35 +132,34 @@ def main():
         embd = None
         print('Dataset length: {}'.format(val_dataset.__len__()))
         iter = val_dataset.__len__()/args.batch_size
-        with torch.no_grad:
-            for i, (images, targets, _) in enumerate(dataloader):
-                if(i%1000 == 0):
-                    print('{}/{}'.format(int(i/1000),int(iter/1000)))
-                images = images.cuda()
-                targets = targets.cuda()
-                # print('dim_{}'.format(model.size(1)))
-                # assert (model.size(1) == 128)
-                output = model(images)
-                # print('dim_{}'.format(output.size(1)))
-                # assert (output.size(1) == 128)
-                if labels == None:
-                    labels = embd = []
-                # else:
-                t = targets.cpu()
-                o = output.cpu()
-                if i == 0:
-                    print(o.numpy().shape)
-                    print(t.numpy().shape)
-                labels.extend(t.numpy())# torch.cat([labels, targets], dim=0)
-                embd.extend(o.numpy()) #= torch.cat([embd, output], dim=0)
-            # embeddings['embedding'] = embd
-            # embeddings['year_built'] = labels
-            # df = pd.DataFrame(embeddings)
-            embd = np.array(embd)
-            labels = np.array(labels)
-            if (args.to_csv):
-                np.save(name+'_embd.npy', embd)
-                np.save(name + '_label.npy', labels)
+        for i, (images, targets, _) in enumerate(dataloader):
+            if(i%1000 == 0):
+                print('{}/{}'.format(int(i/1000),int(iter/1000)))
+            images = images.cuda()
+            targets = targets.cuda()
+            # print('dim_{}'.format(model.size(1)))
+            # assert (model.size(1) == 128)
+            output = model(images)
+            # print('dim_{}'.format(output.size(1)))
+            # assert (output.size(1) == 128)
+            if labels == None:
+                labels = embd = []
+            # else:
+            t = targets.cpu().detach()
+            o = output.cpu().detach()
+            if i == 0:
+                print(o.numpy().shape)
+                print(t.numpy().shape)
+            labels.extend(t.numpy())# torch.cat([labels, targets], dim=0)
+            embd.extend(o.numpy()) #= torch.cat([embd, output], dim=0)
+        # embeddings['embedding'] = embd
+        # embeddings['year_built'] = labels
+        # df = pd.DataFrame(embeddings)
+        embd = np.array(embd)
+        labels = np.array(labels)
+        if (args.to_csv):
+            np.save(name+'_embd.npy', embd)
+            np.save(name + '_label.npy', labels)
 if __name__ == '__main__':
     if not os.path.exists('/home/shuai/MoCo_stats/embedding'):
         os.mkdir('/home/shuai/MoCo_stats/embedding')
