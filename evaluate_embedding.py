@@ -70,7 +70,8 @@ def main():
     normalize = normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
     augmentation_val = transforms.Compose([
-                transforms.Resize(224),
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
                 transforms.ToTensor(),
                 normalize,
             ])
@@ -149,7 +150,7 @@ def main():
             tt = np.array(t)
             oo = np.array(o)
             labels.extend(tt)# torch.cat([labels, targets], dim=0)
-            embd.extend(oo) #= torch.cat([embd, output], dim=0)
+            embd.extend(oo.reshape(oo.shape[1])) #= torch.cat([embd, output], dim=0)
         # embeddings['embedding'] = embd
         # embeddings['year_built'] = labels
         # df = pd.DataFrame(embeddings)
