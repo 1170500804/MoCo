@@ -93,7 +93,7 @@ def main():
         iter = val_dataset.__len__()/args.batch_size
         for i, (images, targets, _) in enumerate(dataloader):
             if(i%1000 == 0):
-                print(str(i)+'/'+iter)
+                print('{}/{}'.format(i,iter))
             images = images.cuda()
             targets = targets.cuda()
             # print('dim_{}'.format(model.size(1)))
