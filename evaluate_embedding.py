@@ -95,8 +95,8 @@ def main():
             # print('dim_{}'.format(model.size(1)))
             # assert (model.size(1) == 128)
             output = model(images)
-            print('dim_{}'.format(output.size(1)))
-            assert (output.size(1) == 128)
+            # print('dim_{}'.format(output.size(1)))
+            # assert (output.size(1) == 128)
             if labels == None:
                 labels = targets
                 embd = output
