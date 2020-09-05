@@ -82,6 +82,7 @@ def main():
         print("=> loaded pre-trained model '{}'".format(args.resume))
     else:
         print("=> no checkpoint found at '{}'".format(args.resume))
+    model = torch.nn.DataParallel(model)
     if args.embedding_file:
         pass
     else:
