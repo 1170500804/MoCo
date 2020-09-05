@@ -61,7 +61,6 @@ def main():
     #                         world_size=args.world_size, rank=args.rank)
     # load model
     model = models.__dict__[args.arch]()
-    model.cuda()
     # model = torch.nn.parallel.DistributedDataParallel(model)
     if os.path.isfile(args.resume):
         print("=> loading checkpoint '{}'".format(args.resume))
@@ -82,7 +81,7 @@ def main():
         print("=> loaded pre-trained model '{}'".format(args.resume))
     else:
         print("=> no checkpoint found at '{}'".format(args.resume))
-    model = torch.nn.DataParallel(model)
+    model = torch.nn.DataParallel(model).cuda()
     if args.embedding_file:
         pass
     else:
