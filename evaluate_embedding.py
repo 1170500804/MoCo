@@ -38,7 +38,7 @@ def plot_t_sne(data_subset, filename):
         legend="full",
         alpha=0.3
     )
-    sns_plot.savefig(filename)
+    sns_plot.savefig(filename+'.png')
 def main():
     parser = argparse.ArgumentParser(description='PyTorch year_built Training Validation')
     parser.add_argument('--validate-data', type=str, help='the data to be visualized', required=True)
@@ -108,7 +108,14 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = torch.nn.DataParallel(model, device_ids=[0,1]).to(device)
     if args.embedding_file:
-        pass
+        # /home/shuai/MoCo_stats/embedding/09032020checkpoint_0137.csv
+        df = pd.read_csv(args.embedding_file)
+        if(args.embedding_file.endswith('/')):
+            filename = (args.embedding_file.split('/')[-2]).split('.')[0]
+        else:
+            filename = (args.embedding_file.split('/')[-1]).split('.')[0]
+
+        plot_t_sne(df, filename)
     else:
         if (args.to_csv):
             name = args.resume.split('/')
