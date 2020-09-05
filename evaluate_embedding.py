@@ -90,7 +90,10 @@ def main():
         model.eval()
         labels = None
         embd = None
+        iter = val_dataset.__len__()/args.batch_size
         for i, (images, targets, _) in enumerate(dataloader):
+            if(i%1000 == 0):
+                print(i+'/'+iter)
             images = images.cuda()
             targets = targets.cuda()
             # print('dim_{}'.format(model.size(1)))
@@ -101,8 +104,13 @@ def main():
             if labels == None:
                 labels = embd = []
             # else:
-            labels.extend(targets.cpu().tolist())# torch.cat([labels, targets], dim=0)
-            embd.extend(output.cpu().tolist()) #= torch.cat([embd, output], dim=0)
+            t = targets.cpu()
+            o = output.cpu()
+            if i == 0:
+                print(o.size())
+                print(t.size())
+            labels.extend(t.tolist())# torch.cat([labels, targets], dim=0)
+            embd.extend(o.tolist()) #= torch.cat([embd, output], dim=0)
             # print('dim_{}'.format(output.size(1)))
             # assert(model.size(1) == 128)
         # labels = labels.cpu().tolist()
