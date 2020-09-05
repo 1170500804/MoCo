@@ -82,7 +82,7 @@ def main():
     else:
         print("=> no checkpoint found at '{}'".format(args.resume))
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = torch.nn.DataParallel(model, device_ids=[0,1], output_device=[0,1]).to(device)
+    model = torch.nn.DataParallel(model, device_ids=[0,1]).to(device)
     if args.embedding_file:
         pass
     else:
