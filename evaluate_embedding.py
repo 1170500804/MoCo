@@ -20,6 +20,7 @@ from torchvision import models
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
+# /home/shuai/MoCo_stats/unsupervised_pretrained_20200904035252/checkpoint_0199.pth.tar
 def plot_t_sne(data_subset, filename):
     time_start = time.time()
     tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
@@ -27,7 +28,7 @@ def plot_t_sne(data_subset, filename):
     print('t-SNE done! Time elapsed: {} seconds'.format(time.time() - time_start))
     data_subset['tsne-2d-one'] = tsne_results[:, 0]
     data_subset['tsne-2d-two'] = tsne_results[:, 1]
-    plt.figure(figsize=(16, 10))
+    plt.figure(figsize=(32, 32))
     # sns.set()
 
     sns_plot = sns.scatterplot(
@@ -75,38 +76,7 @@ def main():
                 transforms.ToTensor(),
                 normalize,
             ])
-    val_dataset = cluster_year_built_dataset(args.batch_size,'year_built', args.validate_data, args.data, transform=augmentation_val, )
-    dataloader = DataLoader(val_dataset,shuffle=False,
-            num_workers=args.workers, pin_memory=True)
-    embeddings = {'embedding':[], 'year_built':[]}
 
-    # parallel training
-    # dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
-    #                         world_size=args.world_size, rank=args.rank)
-    # load model
-    model = models.__dict__[args.arch]()
-    # model = torch.nn.parallel.DistributedDataParallel(model)
-    if os.path.isfile(args.resume):
-        print("=> loading checkpoint '{}'".format(args.resume))
-        checkpoint = torch.load(args.resume, map_location="cpu")
-
-        # rename moco pre-trained keys
-        state_dict = checkpoint['state_dict']
-        for k in list(state_dict.keys()):
-            # retain only encoder_q up to before the embedding layer
-            if k.startswith('module.encoder_q') and not k.startswith('module.encoder_q.fc'):
-                # remove prefix
-                state_dict[k[len("module.encoder_q."):]] = state_dict[k]
-            # delete renamed or unused k
-            del state_dict[k]
-
-
-
-        print("=> loaded pre-trained model '{}'".format(args.resume))
-    else:
-        print("=> no checkpoint found at '{}'".format(args.resume))
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = torch.nn.DataParallel(model, device_ids=[0,1]).to(device)
     if args.embedding_file:
         # /home/shuai/MoCo_stats/embedding/09032020checkpoint_0137.csv
         df = pd.read_csv(args.embedding_file)
@@ -117,6 +87,36 @@ def main():
 
         plot_t_sne(df, filename)
     else:
+        val_dataset = cluster_year_built_dataset(args.batch_size, 'year_built', args.validate_data, args.data,
+                                                 transform=augmentation_val, )
+        dataloader = DataLoader(val_dataset, shuffle=False,
+                                num_workers=args.workers, pin_memory=True)
+        embeddings = {'embedding': [], 'year_built': []}
+
+        # parallel training
+        # dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
+        #                         world_size=args.world_size, rank=args.rank)
+        # load model
+        model = models.__dict__[args.arch]()
+        # model = torch.nn.parallel.DistributedDataParallel(model)
+        if os.path.isfile(args.resume):
+            print("=> loading checkpoint '{}'".format(args.resume))
+            checkpoint = torch.load(args.resume, map_location="cpu")
+
+            # rename moco pre-trained keys
+            state_dict = checkpoint['state_dict']
+            for k in list(state_dict.keys()):
+                # retain only encoder_q up to before the embedding layer
+                if k.startswith('module.encoder_q') and not k.startswith('module.encoder_q.fc'):
+                    # remove prefix
+                    state_dict[k[len("module.encoder_q."):]] = state_dict[k]
+                # delete renamed or unused k
+                del state_dict[k]
+            print("=> loaded pre-trained model '{}'".format(args.resume))
+        else:
+            print("=> no checkpoint found at '{}'".format(args.resume))
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        model = torch.nn.DataParallel(model, device_ids=[0, 1]).to(device)
         if (args.to_csv):
             name = args.resume.split('/')
             if(args.resume.endswith('/')):
@@ -151,13 +151,8 @@ def main():
                 print(t.size())
             labels.extend(t.tolist())# torch.cat([labels, targets], dim=0)
             embd.extend(o.tolist()) #= torch.cat([embd, output], dim=0)
-            # print('dim_{}'.format(output.size(1)))
-            # assert(model.size(1) == 128)
-        # labels = labels.cpu().tolist()
-        # embd = embd.cpu().tolist()
         embeddings['embedding'] = embd
         embeddings['year_built'] = labels
-
         df = pd.DataFrame(embeddings)
         if (args.to_csv):
             df.to_csv('/home/shuai/MoCo_stats/embedding/embeddings_'+name+'.csv')
