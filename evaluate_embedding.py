@@ -112,13 +112,11 @@ def main():
     else:
         if (args.to_csv):
             name = args.resume.split('/')
-            print('resume: '+args.resume)
-            print(name)
             if(args.resume.endswith('/')):
-                name = name[-3].split('_')[-1] + name[-2].split['.'][0]
+                name = name[-3].split('_')[-1] + name[-2].split('.')[0]
                 print(name)
             else:
-                name = name[-2].split('_')[-1] + name[-1].split['.'][0]
+                name = name[-2].split('_')[-1] + name[-1].split('.')[0]
             print(name)
         # compute embeddings
         model.eval()
