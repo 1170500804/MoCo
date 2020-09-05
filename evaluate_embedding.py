@@ -57,12 +57,12 @@ def main():
     embeddings = {'embedding':[], 'year_built':[]}
 
     # parallel training
-    dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
-                            world_size=args.world_size, rank=args.rank)
+    # dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
+    #                         world_size=args.world_size, rank=args.rank)
     # load model
     model = models.__dict__[args.arch]()
     model.cuda()
-    model = torch.nn.parallel.DistributedDataParallel(model)
+    # model = torch.nn.parallel.DistributedDataParallel(model)
     if os.path.isfile(args.resume):
         print("=> loading checkpoint '{}'".format(args.resume))
         checkpoint = torch.load(args.resume, map_location="cpu")
