@@ -81,7 +81,8 @@ def main():
         print("=> loaded pre-trained model '{}'".format(args.resume))
     else:
         print("=> no checkpoint found at '{}'".format(args.resume))
-    model = torch.nn.DataParallel(model).cuda()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = torch.nn.DataParallel(model).to(device)
     if args.embedding_file:
         pass
     else:
