@@ -98,6 +98,7 @@ def main():
         # load model
         model = models.__dict__[args.arch]()
         # model = torch.nn.parallel.DistributedDataParallel(model)
+        model = model.cuda()
         if os.path.isfile(args.resume):
             print("=> loading checkpoint '{}'".format(args.resume))
             checkpoint = torch.load(args.resume, map_location="cpu")
@@ -114,8 +115,6 @@ def main():
             print("=> loaded pre-trained model '{}'".format(args.resume))
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        model = torch.nn.DataParallel(model, device_ids=[0, 1]).to(device)
         if (args.to_csv):
             name = args.resume.split('/')
             if(args.resume.endswith('/')):
@@ -149,7 +148,7 @@ def main():
                 print(np.array(t).shape)
                 print(np.array(o).shape)
             labels.extend(np.array(t))# torch.cat([labels, targets], dim=0)
-            embd.extend(np.array(t)) #= torch.cat([embd, output], dim=0)
+            embd.extend(np.array(o)) #= torch.cat([embd, output], dim=0)
         # embeddings['embedding'] = embd
         # embeddings['year_built'] = labels
         # df = pd.DataFrame(embeddings)
