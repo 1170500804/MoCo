@@ -99,15 +99,14 @@ def main():
             # print('dim_{}'.format(output.size(1)))
             # assert (output.size(1) == 128)
             if labels == None:
-                labels = targets
-                embd = output
-            else:
-                labels = torch.cat([labels, targets], dim=0)
-                embd = torch.cat([embd, output], dim=0)
+                labels = embd = []
+            # else:
+            labels.extend(targets.cpu().tolist())# torch.cat([labels, targets], dim=0)
+            embd.extend(output.cpu().tolist()) #= torch.cat([embd, output], dim=0)
             # print('dim_{}'.format(output.size(1)))
             # assert(model.size(1) == 128)
-        labels = labels.cpu().tolist()
-        embd = embd.cpu().tolist()
+        # labels = labels.cpu().tolist()
+        # embd = embd.cpu().tolist()
         embeddings['embedding'] = embd
         embeddings['year_built'] = labels
 
