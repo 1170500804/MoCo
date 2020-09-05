@@ -158,8 +158,8 @@ def main():
         print(embd.shape)
         print(labels.shape)
         if (args.to_csv):
-            np.savetxt('/home/shuai/MoCo_stats/embedding/'+name+'_embd.npy', embd)
-            np.savetxt('/home/shuai/MoCo_stats/embedding/'+name+'_label.npy', labels)
+            np.savetxt('/home/shuai/MoCo_stats/embedding/'+name+'_embd.csv', embd)
+            np.savetxt('/home/shuai/MoCo_stats/embedding/'+name+'_label.csv', labels)
 if __name__ == '__main__':
     if not os.path.exists('/home/shuai/MoCo_stats/embedding'):
         os.mkdir('/home/shuai/MoCo_stats/embedding')
