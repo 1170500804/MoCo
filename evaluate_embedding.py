@@ -145,10 +145,12 @@ def main():
             t = targets.cpu().detach()
             o = output.cpu().detach()
             if i == 0:
-                print(np.array(t).shape)
-                print(np.array(o).shape)
-            labels.extend(np.array(t))# torch.cat([labels, targets], dim=0)
-            embd.extend(np.array(o)) #= torch.cat([embd, output], dim=0)
+                print(np.array(t))
+                print(np.array(o))
+            tt = np.array(t)
+            oo = np.array(o)
+            labels.extend(tt)# torch.cat([labels, targets], dim=0)
+            embd.extend(oo) #= torch.cat([embd, output], dim=0)
         # embeddings['embedding'] = embd
         # embeddings['year_built'] = labels
         # df = pd.DataFrame(embeddings)
