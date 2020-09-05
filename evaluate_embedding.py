@@ -7,6 +7,7 @@ import seaborn as sns
 import argparse
 import pandas as pd
 import os
+import numpy as np
 
 import torch
 from torchvision import transforms
@@ -151,11 +152,14 @@ def main():
                 print(t.size())
             labels.extend(t.tolist())# torch.cat([labels, targets], dim=0)
             embd.extend(o.tolist()) #= torch.cat([embd, output], dim=0)
-        embeddings['embedding'] = embd
-        embeddings['year_built'] = labels
-        df = pd.DataFrame(embeddings)
+        # embeddings['embedding'] = embd
+        # embeddings['year_built'] = labels
+        # df = pd.DataFrame(embeddings)
+        embd = np.array(embd)
+        labels = np.array(labels)
         if (args.to_csv):
-            df.to_csv('/home/shuai/MoCo_stats/embedding/embeddings_'+name+'.csv')
+            np.save(name+'_embd.npy', embd)
+            np.save(name + '_label.npy', embd)
 if __name__ == '__main__':
     if not os.path.exists('/home/shuai/MoCo_stats/embedding'):
         os.mkdir('/home/shuai/MoCo_stats/embedding')
