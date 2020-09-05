@@ -159,7 +159,7 @@ def main():
         labels = np.array(labels)
         if (args.to_csv):
             np.save(name+'_embd.npy', embd)
-            np.save(name + '_label.npy', embd)
+            np.save(name + '_label.npy', labels)
 if __name__ == '__main__':
     if not os.path.exists('/home/shuai/MoCo_stats/embedding'):
         os.mkdir('/home/shuai/MoCo_stats/embedding')
