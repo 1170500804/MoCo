@@ -71,6 +71,7 @@ def main():
                                          std=[0.229, 0.224, 0.225])
     augmentation_val = transforms.Compose([
                 transforms.Resize(224),
+                transforms.ToTensor(),
                 normalize,
             ])
 
