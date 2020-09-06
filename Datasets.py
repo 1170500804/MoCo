@@ -100,8 +100,8 @@ class Rolling_Window_Year_Dataset(Dataset):
         #min_year = self.df[self.attribute_name].min()
         #max_year = self.df[self.attribute_name].max()
         #max_year += int((max_year - min_year) % 10)+2 # padd to full 10 year intervals
-        min_year = 1913
-        max_year = 2023 # Not all datasets have all years so this needs to be hard set
+        min_year = np.min(self.df[attribute_name])
+        max_year = np.max(self.df[attribute_name])+step # Not all datasets have all years so this needs to be hard set
 
         #classes = sliding_window(np.array(range(int(min_year),int(max_year))), size=10, stepsize=10)
         classes = skimage.util.view_as_windows(np.array(range(int(min_year),int(max_year))),10,step=step)
