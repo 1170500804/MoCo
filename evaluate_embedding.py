@@ -24,21 +24,21 @@ model_names = sorted(name for name in models.__dict__
 # /home/shuai/MoCo_stats/unsupervised_pretrained_20200904035252/checkpoint_0199.pth.tar
 def plot_t_sne(data_subset_embd, data_subset_label, filename):
     time_start = time.time()
-    tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
+    tsne = TSNE(n_components=2, verbose=1, perplexity=50, n_iter=3000)
     tsne_results = tsne.fit_transform(data_subset_embd)
     print('t-SNE done! Time elapsed: {} seconds'.format(time.time() - time_start))
-    plt.figure(figsize=(32, 32))
+    plt.figure(figsize=(15, 15))
     # sns.set()
 
     sns_plot = sns.scatterplot(
         x=tsne_results[:, 0], y=tsne_results[:, 1],
-        hue="year_built",
-        palette=sns.color_palette("hls", 10),
-        data=data_subset_label,
+        hue=data_subset_label,
+        palette=sns.cubehelix_palette(dark=.1, light=.9, hue=1,as_cmap=True, n_colors=len(np.unique(label))),
         legend="full",
+        s=30,
         alpha=0.3
     )
-    sns_plot.savefig(filename+'.png')
+    sns_plot.figure.savefig('/home/shuai/MoCo_stats/embedding/'+filename+'.png')
 def main():
     parser = argparse.ArgumentParser(description='PyTorch year_built Training Validation')
     parser.add_argument('--validate-data', type=str, help='the data to be visualized', required=True)
@@ -49,7 +49,8 @@ def main():
     parser.add_argument('--data', default='', type=str,
                         help='path to dataset')
     parser.add_argument('--to-csv', action='store_true', help='save the embeddin as file in /home/shuai/MoCo_stats/embedding')
-    parser.add_argument('--embedding-file', type=str, help='if provide the embedding file')
+    parser.add_argument('--embedding-file-e', type=str, help='if provide the embedding file')
+    parser.add_argument('--embedding-file-l', type=str, help='if provide the label file')
     parser.add_argument('--batch-size', type=int, default=32)
     parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet50',
                         choices=model_names,
@@ -77,15 +78,23 @@ def main():
                 normalize,
             ])
 
-    if args.embedding_file:
+    if args.embedding_file_e or args.embedding_file_l:
         # /home/shuai/MoCo_stats/embedding/09032020checkpoint_0137.csv
-        df = pd.read_csv(args.embedding_file)
-        if(args.embedding_file.endswith('/')):
+        if(args.embedding_file_l and args.embedding_file_e):
+            embd = np.loadtxt(args.embedding_file_e)
+            label = np.loadtxt(args.embedding_file_l)
+            label = np.asarray(label)
+            label = pd.Series(label, dtype=int)
+        else:
+            print('require embedding/label file!')
+            exit()
+
+        if(args.embedding_file_e.endswith('/')):
             filename = (args.embedding_file.split('/')[-2]).split('.')[0]
         else:
             filename = (args.embedding_file.split('/')[-1]).split('.')[0]
 
-        plot_t_sne(df, filename)
+        plot_t_sne(embd, label, filename)
     else:
         val_dataset = Rolling_Window_Year_Dataset(args.batch_size, 'year_built', args.validate_data, args.data,
                                                  transform=augmentation_val, step=args.step)
