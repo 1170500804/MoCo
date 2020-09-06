@@ -14,7 +14,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 import torch.distributed as dist
 
-from Datasets import cluster_year_built_dataset
+from Datasets import Rolling_Window_Year_Dataset
 import moco.loader
 import moco.builder
 from torchvision import models
@@ -64,6 +64,7 @@ def main():
                         help='url used to set up distributed training')
     parser.add_argument('--dist-backend', default='nccl', type=str,
                         help='distributed backend')
+    parser.add_argument('--step', default=10, type=int, help='the step of the rolling window')
 
     args = parser.parse_args()
     # prepare dataset
@@ -86,8 +87,8 @@ def main():
 
         plot_t_sne(df, filename)
     else:
-        val_dataset = cluster_year_built_dataset(args.batch_size, 'year_built', args.validate_data, args.data,
-                                                 transform=augmentation_val, )
+        val_dataset = Rolling_Window_Year_Dataset(args.batch_size, 'year_built', args.validate_data, args.data,
+                                                 transform=augmentation_val, step=args.step)
         dataloader = DataLoader(val_dataset, shuffle=False,
                                 num_workers=args.workers, pin_memory=True)
         embeddings = {'embedding': [], 'year_built': []}

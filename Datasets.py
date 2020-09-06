@@ -86,7 +86,7 @@ class Rolling_Window_Year_Dataset(Dataset):
        'number_of_stories', 'building_address_full_cleaned'
     '''
 
-    def __init__(self, attribute_name, csv_path, img_path, transform=None, regression=False, mask_buildings=False, softmask=False):
+    def __init__(self, attribute_name, csv_path, img_path, transform=None, regression=False, mask_buildings=False, softmask=False, step=10):
         if (attribute_name != 'year_built' and attribute_name != 'effective_year_built:') or regression:
             raise ValueError('Wrong attribute or training type for this dataset')
 
@@ -104,7 +104,7 @@ class Rolling_Window_Year_Dataset(Dataset):
         max_year = 2023 # Not all datasets have all years so this needs to be hard set
 
         #classes = sliding_window(np.array(range(int(min_year),int(max_year))), size=10, stepsize=10)
-        classes = skimage.util.view_as_windows(np.array(range(int(min_year),int(max_year))),10,step=10)
+        classes = skimage.util.view_as_windows(np.array(range(int(min_year),int(max_year))),10,step=step)
         self.class_names = [(str(start) + '-' + str(end)) for start, end in zip(classes[:, 0], classes[:, -1])]
         self.label_lookup = {}
         for year in self.df[self.attribute_name].unique():
