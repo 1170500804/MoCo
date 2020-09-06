@@ -140,17 +140,11 @@ def main():
             # print('dim_{}'.format(output.size(1)))
             # assert (output.size(1) == 128)
             if labels == None:
-                labels = embd = []
-            # else:
-            t = targets.cpu().detach()
-            o = output.cpu().detach()
-            if i == 0:
-                print(np.array(t))
-                print(np.array(o))
-            tt = np.array(t)
-            oo = np.array(o)
-            labels.extend(tt)# torch.cat([labels, targets], dim=0)
-            embd.extend(oo.reshape(oo.shape[1])) #= torch.cat([embd, output], dim=0)
+                labels = targets.cpu().detach()
+                embd = output.cpu().detach()
+            else:
+                labels = torch.cat([labels, targets.cpu().detach()], dim=0)
+                embd = torch.cat([embd, output.cpu().detach()], dim=0)
         # embeddings['embedding'] = embd
         # embeddings['year_built'] = labels
         # df = pd.DataFrame(embeddings)

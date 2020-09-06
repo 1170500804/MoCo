@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="89652f59-98e6-4bd9-9513-746dd2a0dbc2" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/evaluate_embedding.py" beforeDir="false" afterPath="$PROJECT_DIR$/evaluate_embedding.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -83,7 +84,7 @@
       <workItem from="1599136546344" duration="1901000" />
       <workItem from="1599139903087" duration="3939000" />
       <workItem from="1599223042570" duration="7206000" />
-      <workItem from="1599291169252" duration="16444000" />
+      <workItem from="1599291169252" duration="17547000" />
     </task>
     <servers />
   </component>
