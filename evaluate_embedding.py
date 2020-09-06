@@ -130,7 +130,7 @@ def main():
         embd = None
         print('Dataset length: {}'.format(val_dataset.__len__()))
         iter = val_dataset.__len__()/args.batch_size
-        for i, (images, targets, _) in enumerate(dataloader):
+        for i, (images, targets) in enumerate(dataloader):
             if(i%1000 == 0):
                 print('{}/{}'.format(int(i/1000),int(iter/1000)))
             images = images.cuda()
