@@ -90,9 +90,9 @@ def main():
             exit()
 
         if(args.embedding_file_e.endswith('/')):
-            filename = (args.embedding_file.split('/')[-2]).split('.')[0]
+            filename = (args.embedding_file_e.split('/')[-2]).split('.')[0]
         else:
-            filename = (args.embedding_file.split('/')[-1]).split('.')[0]
+            filename = (args.embedding_file_e.split('/')[-1]).split('.')[0]
 
         plot_t_sne(embd, label, filename)
     else:
