@@ -86,7 +86,7 @@ class Rolling_Window_Year_Dataset(Dataset):
        'number_of_stories', 'building_address_full_cleaned'
     '''
 
-    def __init__(self, batchsize, attribute_name, csv_path, img_path, transform=None, regression=False, mask_buildings=False, softmask=False,step=10):
+    def __init__(self, batchsize, attribute_name, csv_path, img_path, transform=None, regression=False, mask_buildings=False, softmask=False,step=10, style='fixed'):
         if (attribute_name != 'year_built' and attribute_name != 'effective_year_built:') or regression:
             raise ValueError('Wrong attribute or training type for this dataset')
 
@@ -96,6 +96,7 @@ class Rolling_Window_Year_Dataset(Dataset):
         self.attribute_name = attribute_name
         self.mask_buildings = mask_buildings
         self.softmask=softmask
+        self.style = style
 
         #min_year = self.df[self.attribute_name].min()
         #max_year = self.df[self.attribute_name].max()
@@ -104,14 +105,18 @@ class Rolling_Window_Year_Dataset(Dataset):
         max_year = np.max(self.df[attribute_name])+step # Not all datasets have all years so this needs to be hard set
 
         #classes = sliding_window(np.array(range(int(min_year),int(max_year))), size=10, stepsize=10)
-        classes = skimage.util.view_as_windows(np.array(range(int(min_year),int(max_year))),10,step=step)
-        self.class_names = [(str(start) + '-' + str(end)) for start, end in zip(classes[:, 0], classes[:, -1])]
-        self.label_lookup = {}
-        for year in self.df[self.attribute_name].unique():
-            for i in range(len(classes)):
-                if int(year) in classes[i]:
-                    self.label_lookup[int(year)] = i
-                    break
+        if(style == 'fixed'):
+            classes = skimage.util.view_as_windows(np.array(range(int(min_year),int(max_year))),10,step=step)
+            self.class_names = [(str(start) + '-' + str(end)) for start, end in zip(classes[:, 0], classes[:, -1])]
+            self.label_lookup = {}
+            for year in self.df[self.attribute_name].unique():
+                for i in range(len(classes)):
+                    if int(year) in classes[i]:
+                        self.label_lookup[int(year)] = i
+                        break
+        else:
+            self.time_point = np.array([1975, 1983, 1987, 1992, 1996, 2000, 2009, 2015])
+
 
 
         self.img_path = img_path
@@ -124,35 +129,39 @@ class Rolling_Window_Year_Dataset(Dataset):
             idx = idx.tolist()
         img_name = self.df.iloc[idx]['filename']
         image = Image.open(os.path.join(self.img_path, img_name))
+        if (self.style == 'fixed'):
+            if self.mask_buildings:
+                image = np.array(image)
+                if self.softmask:
+                    mask_filename = self.df.iloc[idx]['filename'].replace('.jpg', '-softmask.npy')
+                    mask = np.load(os.path.join(self.img_path,mask_filename))
+                    mask = np.array(mask)
+                    image = np.array(np.stack(
+                        (image[:, :, 0] * mask, image[:, :, 1] * mask, image[:, :, 2] * mask), 2),
+                             dtype=np.uint8)
+                    #plt.imshow(image)
+                    #plt.show()
+                else:
+                    mask_filename = self.df.iloc[idx]['filename'].replace('jpg', 'png')
+                    mask = Image.open(os.path.join(self.img_path, mask_filename))
+                    mask = np.array(mask)
+                    # Filter building labels
+                    mask[np.where((mask != 25) & (mask != 1))] = 0
+                    image[mask == 0, :] = 0
+                    #plt.imshow(image)
+                    #plt.show()
+                image = Image.fromarray(np.uint8(image))
 
-        if self.mask_buildings:
-            image = np.array(image)
-            if self.softmask:
-                mask_filename = self.df.iloc[idx]['filename'].replace('.jpg', '-softmask.npy')
-                mask = np.load(os.path.join(self.img_path,mask_filename))
-                mask = np.array(mask)
-                image = np.array(np.stack(
-                    (image[:, :, 0] * mask, image[:, :, 1] * mask, image[:, :, 2] * mask), 2),
-                         dtype=np.uint8)
-                #plt.imshow(image)
-                #plt.show()
-            else:
-                mask_filename = self.df.iloc[idx]['filename'].replace('jpg', 'png')
-                mask = Image.open(os.path.join(self.img_path, mask_filename))
-                mask = np.array(mask)
-                # Filter building labels
-                mask[np.where((mask != 25) & (mask != 1))] = 0
-                image[mask == 0, :] = 0
-                #plt.imshow(image)
-                #plt.show()
-            image = Image.fromarray(np.uint8(image))
-
-        label = self.df.iloc[idx][self.attribute_name]
-        label = self.label_lookup[int(label)] # Translate to coarse class
-
-
-
-
+            label = self.df.iloc[idx][self.attribute_name]
+            label = self.label_lookup[int(label)] # Translate to coarse class
+        else:
+            label = int(self.df.iloc[idx][self.attribute_name])
+            # class 0 is (-inf, 1975]: the sum over relation_with_time_point is 8
+            # class 1 is (1975, 1983]: the sum over relation with time point is 7
+            #...
+            # the summation of class and relation_with_time_point is 8
+            relation_with_time_point = (label <= self.time_point)
+            label = 8 - np.sum(relation_with_time_point)
         if (self.transform):
             image = self.transform(image)
 

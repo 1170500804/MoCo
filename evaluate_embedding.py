@@ -66,6 +66,7 @@ def main():
     parser.add_argument('--dist-backend', default='nccl', type=str,
                         help='distributed backend')
     parser.add_argument('--step', default=10, type=int, help='the step of the rolling window')
+    parser.add_argument('--style', default='fixed', type=str, help='the way you load dataset', choices=['fixed', 'cus'])
 
     args = parser.parse_args()
     # prepare dataset
@@ -97,7 +98,7 @@ def main():
         plot_t_sne(embd, label, filename)
     else:
         val_dataset = Rolling_Window_Year_Dataset(args.batch_size, 'year_built', args.validate_data, args.data,
-                                                 transform=augmentation_val, step=args.step)
+                                                 transform=augmentation_val, step=args.step, style=args.style)
         dataloader = DataLoader(val_dataset, shuffle=False,
                                 num_workers=args.workers, pin_memory=True)
         embeddings = {'embedding': [], 'year_built': []}
@@ -163,8 +164,8 @@ def main():
         print(embd.shape)
         print(labels.shape)
         if (args.to_csv):
-            np.savetxt('/home/shuai/MoCo_stats/embedding/'+name+'_embd.csv', embd)
-            np.savetxt('/home/shuai/MoCo_stats/embedding/'+name+'_label.csv', labels)
+            np.savetxt('/home/shuai/MoCo_stats/embedding/'+name+'_{}_embd.csv'.format(args.style), embd)
+            np.savetxt('/home/shuai/MoCo_stats/embedding/'+name+'_{}_label.csv'.format(args.style), labels)
 if __name__ == '__main__':
     if not os.path.exists('/home/shuai/MoCo_stats/embedding'):
         os.mkdir('/home/shuai/MoCo_stats/embedding')
