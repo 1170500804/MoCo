@@ -1,4 +1,4 @@
-from .csail_segmentation import MaskBuilding
+from csail_segmentation_tool.csail_segmentation import MaskBuilding
 import argparse
 import pandas as pd
 from PIL import Image
