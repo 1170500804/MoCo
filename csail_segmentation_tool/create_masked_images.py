@@ -6,8 +6,8 @@ from PIL import Image
 from torchvision import transforms
 import numpy as np
 
-from csail_segmentation_tool.csail_seg.config import cfg
-from csail_segmentation_tool.csail_seg.models import ModelBuilder
+from ..csail_segmentation_tool.csail_seg.config import cfg
+from ..csail_segmentation_tool.csail_seg.models import ModelBuilder
 from scipy.io import loadmat
 
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
