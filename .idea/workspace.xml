@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="89652f59-98e6-4bd9-9513-746dd2a0dbc2" name="Default Changelist" comment="" />
+    <list default="true" id="89652f59-98e6-4bd9-9513-746dd2a0dbc2" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/csail_segmentation_tool/create_masked_images.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -83,6 +86,7 @@
       <workItem from="1599223042570" duration="7206000" />
       <workItem from="1599291169252" duration="22068000" />
       <workItem from="1599719407394" duration="2089000" />
+      <workItem from="1599959287641" duration="1772000" />
     </task>
     <servers />
   </component>
