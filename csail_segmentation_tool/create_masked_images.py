@@ -1,4 +1,4 @@
-from csail_segmentation_tool import csail_segmentation
+from .csail_segmentation import MaskBuilding
 import argparse
 import pandas as pd
 from PIL import Image
@@ -10,7 +10,7 @@ parser.add_argument('--in-images', type=str, help='the file describing raw image
 parser.add_argument('--out-dir', type=str, help='the directory to which the program outputs')
 
 args = parser.parse_args()
-Mask = csail_segmentation.MaskBuilding()
+Mask = MaskBuilding()
 in_df = pd.read_csv(args.in_images)
 out = {'old_path':[], 'new_path':[]}
 for i in range(len(in_df)):
